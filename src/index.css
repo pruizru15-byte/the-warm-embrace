@@ -51,6 +51,10 @@
 
     --font-serif: 'Playfair Display', Georgia, serif;
     --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --glow-primary: 0 0 20px hsl(345 35% 55% / 0.15);
+    --glow-navy: 0 0 20px hsl(220 55% 22% / 0.15);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
