@@ -18,8 +18,9 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50">
       <div className="glass-card rounded-none border-x-0 border-t-0">
         <div className="section-container flex items-center justify-between h-16">
-          <a href="#" className="font-serif text-xl font-bold text-gradient">
-            Portafolio
+          <a href="#" className="flex items-center gap-2">
+            <span className="font-mono text-xs px-2 py-1 rounded bg-accent/10 text-primary border border-accent/20">&lt;/&gt;</span>
+            <span className="font-serif text-xl font-bold text-gradient">Portafolio</span>
           </a>
 
           {/* Desktop */}
