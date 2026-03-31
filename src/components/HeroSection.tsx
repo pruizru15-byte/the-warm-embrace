@@ -1,7 +1,33 @@
 import { motion } from "framer-motion";
 import { MapPin, ChevronDown } from "lucide-react";
+import { useProfile } from "@/hooks/useData";
 
 const HeroSection = () => {
+  const { data: profile, isLoading } = useProfile();
+
+  // Fallback values while loading or if data is empty
+  const name = profile?.name || "Poeta & Desarrollador";
+  const greeting = profile?.greeting || "Bienvenido a mi mundo";
+  const description = profile?.description || "Un desarrollador apasionado por la tecnología, pero amante de las formas antiguas de conectar. Donde el código se encuentra con la poesía.";
+  const location = profile?.location || "Tu Ciudad, País";
+
+  // Split name for potential <br /> logic if needed, 
+  // or just render it directly
+  const renderName = () => {
+    if (name.includes("&")) {
+      const parts = name.split("&");
+      return (
+        <>
+          <span className="text-gradient">{parts[0].trim()}</span>
+          <br />
+          <span className="text-foreground">&</span>{" "}
+          <span className="text-navy">{parts[1].trim()}</span>
+        </>
+      );
+    }
+    return <span className="text-gradient">{name}</span>;
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Decorative blobs */}
@@ -19,31 +45,27 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-muted-foreground font-sans text-sm tracking-[0.3em] uppercase mb-6"
+            className={`text-muted-foreground font-sans text-sm tracking-[0.3em] uppercase mb-6 ${isLoading ? 'animate-pulse' : ''}`}
           >
-            Bienvenido a mi mundo
+            {greeting}
           </motion.p>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="font-serif text-5xl sm:text-7xl lg:text-8xl font-bold leading-tight mb-6"
+            className={`font-serif text-5xl sm:text-7xl lg:text-8xl font-bold leading-tight mb-6 ${isLoading ? 'animate-pulse' : ''}`}
           >
-            <span className="text-gradient">Poeta</span>
-            <br />
-            <span className="text-foreground">&</span>{" "}
-            <span className="text-navy">Desarrollador</span>
+            {renderName()}
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="font-sans text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto mb-8 leading-relaxed"
+            className={`font-sans text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto mb-8 leading-relaxed ${isLoading ? 'animate-pulse' : ''}`}
           >
-            Un desarrollador apasionado por la tecnología, pero amante de las formas antiguas de conectar.
-            Donde el código se encuentra con la poesía.
+            {description}
           </motion.p>
 
           <motion.div
@@ -53,7 +75,7 @@ const HeroSection = () => {
             className="flex items-center justify-center gap-2 text-muted-foreground"
           >
             <MapPin size={16} className="text-primary" />
-            <span className="font-sans text-sm">Ubicación actual — Tu Ciudad, País</span>
+            <span className={`font-sans text-sm ${isLoading ? 'animate-pulse' : ''}`}>Ubicación actual — {location}</span>
           </motion.div>
         </motion.div>
 

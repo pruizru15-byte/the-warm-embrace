@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, ChevronDown, Terminal, Cpu, Wifi, Activity } from "lucide-react";
+import { useProfile } from "@/hooks/useData";
 
 const useTypingEffect = (text: string, speed = 60, delay = 1000) => {
   const [displayed, setDisplayed] = useState("");
@@ -26,21 +27,6 @@ const useTypingEffect = (text: string, speed = 60, delay = 1000) => {
   return { displayed, done };
 };
 
-const codeLines = [
-  { prefix: "const", content: ' developer = {', color: "text-primary" },
-  { prefix: "  name:", content: ' "Tu Nombre",', color: "text-gold-warm" },
-  { prefix: "  role:", content: ' "Full-Stack Dev",', color: "text-gold-warm" },
-  { prefix: "  passion:", content: ' ["código", "poesía"],', color: "text-gold-warm" },
-  { prefix: "  status:", content: ' "building..."', color: "text-emerald-400" },
-  { prefix: "};", content: '', color: "text-primary" },
-];
-
-const stats = [
-  { label: "Proyectos", value: 12, icon: Cpu },
-  { label: "Tecnologías", value: 8, icon: Activity },
-  { label: "Commits", value: 847, icon: Terminal },
-];
-
 const AnimatedCounter = ({ target, duration = 2000 }: { target: number; duration?: number }) => {
   const [count, setCount] = useState(0);
 
@@ -63,11 +49,47 @@ const AnimatedCounter = ({ target, duration = 2000 }: { target: number; duration
 };
 
 const TechHeroSection = () => {
+  const { data: profile, isLoading } = useProfile();
+
+  const name = profile?.name || "Poeta & Desarrollador";
+  const typewriterText = profile?.description || "Donde el código se encuentra con la poesía.";
+  const location = profile?.location || "Tu Ciudad, País";
+
   const { displayed, done } = useTypingEffect(
-    "Donde el código se encuentra con la poesía.",
-    50,
+    typewriterText,
+    Math.max(30, 100 - typewriterText.length / 5), // Adaptive speed
     1500
   );
+
+  const stats = [
+    { label: "Proyectos", value: 12, icon: Cpu },
+    { label: "Tecnologías", value: 8, icon: Activity },
+    { label: "Commits", value: 847, icon: Terminal },
+  ];
+
+  const renderName = () => {
+    if (name.includes("&")) {
+      const parts = name.split("&");
+      return (
+        <>
+          <span className="text-gradient">{parts[0].trim()}</span>
+          <br />
+          <span className="text-foreground">&</span>{" "}
+          <span className="text-navy">{parts[1].trim()}</span>
+        </>
+      );
+    }
+    return <span className="text-gradient">{name}</span>;
+  };
+
+  const codeLines = [
+    { prefix: "const", content: ' developer = {', color: "text-primary" },
+    { prefix: "  name:", content: ` "${name.split('&')[0].trim()}",`, color: "text-gold-warm" },
+    { prefix: "  role:", content: ` "${name.split('&')[1]?.trim() || "Dev"}",`, color: "text-gold-warm" },
+    { prefix: "  passion:", content: ' ["código", "poesía"],', color: "text-gold-warm" },
+    { prefix: "  status:", content: ' "building..."', color: "text-emerald-400" },
+    { prefix: "};", content: '', color: "text-primary" },
+  ];
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -112,19 +134,16 @@ const TechHeroSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6"
+                className={`font-serif text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 ${isLoading ? 'animate-pulse' : ''}`}
               >
-                <span className="text-gradient">Poeta</span>
-                <br />
-                <span className="text-foreground">&</span>{" "}
-                <span className="text-navy">Desarrollador</span>
+                {renderName()}
               </motion.h1>
 
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="font-sans text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto lg:mx-0 mb-6 leading-relaxed h-8"
+                className={`font-sans text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto lg:mx-0 mb-6 leading-relaxed h-8 ${isLoading ? 'animate-pulse' : ''}`}
               >
                 <span>{displayed}</span>
                 {!done && <span className="inline-block w-0.5 h-5 bg-primary ml-0.5 animate-pulse" />}
@@ -134,10 +153,10 @@ const TechHeroSection = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.2 }}
-                className="flex items-center justify-center lg:justify-start gap-2 text-muted-foreground mb-8"
+                className={`flex items-center justify-center lg:justify-start gap-2 text-muted-foreground mb-8 ${isLoading ? 'animate-pulse' : ''}`}
               >
                 <MapPin size={16} className="text-primary" />
-                <span className="font-sans text-sm">Tu Ciudad, País</span>
+                <span className="font-sans text-sm">{location}</span>
                 <Wifi size={14} className="text-emerald-400 ml-2" />
               </motion.div>
 

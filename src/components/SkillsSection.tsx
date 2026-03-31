@@ -2,35 +2,30 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
 import { Code, Palette, Server, Smartphone, Database, Globe, Layout, Terminal, Zap, GitBranch, Cloud, Shield } from "lucide-react";
+import { useSkills } from "@/hooks/useData";
 
-const skills = [
-  { name: "React", icon: Code, level: 90, color: "from-primary to-rose-deep" },
-  { name: "TypeScript", icon: Terminal, level: 85, color: "from-navy to-accent" },
-  { name: "Node.js", icon: Server, level: 80, color: "from-burgundy to-rose-deep" },
-  { name: "Tailwind CSS", icon: Palette, level: 92, color: "from-primary to-gold-warm" },
-  { name: "Bases de Datos", icon: Database, level: 75, color: "from-navy to-burgundy" },
-  { name: "Responsive", icon: Smartphone, level: 95, color: "from-primary to-navy" },
-  { name: "UI/UX", icon: Layout, level: 82, color: "from-gold-warm to-primary" },
-  { name: "APIs REST", icon: Globe, level: 88, color: "from-navy to-primary" },
-];
+const ICON_MAP: Record<string, any> = {
+  Code, Palette, Server, Smartphone, Database, Globe, Layout, Terminal, Zap, GitBranch, Cloud, Shield
+};
 
-const techMetrics = [
+const techMetricsDefault = [
   { label: "Líneas de código", value: "50K+", icon: Code },
   { label: "Uptime", value: "99.9%", icon: Zap },
   { label: "Repos activos", value: "15+", icon: GitBranch },
   { label: "Deploy Cloud", value: "24/7", icon: Cloud },
 ];
 
-const services = [
+const servicesDefault = [
   { title: "Desarrollo Web", desc: "Sitios y aplicaciones web modernas con React y tecnologías de vanguardia.", icon: Globe, tech: ["React", "Next.js", "Vite"] },
   { title: "Diseño UI/UX", desc: "Interfaces elegantes, intuitivas y centradas en la experiencia del usuario.", icon: Palette, tech: ["Figma", "Tailwind", "Framer"] },
   { title: "Backend & APIs", desc: "Arquitectura de servidor robusta, segura y escalable.", icon: Server, tech: ["Node.js", "PostgreSQL", "REST"] },
   { title: "Seguridad", desc: "Prácticas de seguridad modernas para proteger datos y aplicaciones.", icon: Shield, tech: ["Auth", "JWT", "HTTPS"] },
 ];
 
-const SkillBar = ({ name, level, icon: Icon, color, index }: { name: string; level: number; icon: any; color: string; index: number }) => {
+const SkillBar = ({ name, level, icon: iconName, color, index }: { name: string; level: number; icon: any; color: string; index: number }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const Icon = typeof iconName === 'string' ? (ICON_MAP[iconName] || Code) : iconName;
 
   return (
     <motion.div
@@ -64,6 +59,19 @@ const SkillBar = ({ name, level, icon: Icon, color, index }: { name: string; lev
 };
 
 const SkillsSection = () => {
+  const { data: skillsData, isLoading: skillsLoading } = useSkills();
+  
+  const skills = skillsData || [
+    { name: "React", icon: "Code", level: 90, color: "from-primary to-rose-deep" },
+    { name: "TypeScript", icon: "Terminal", level: 85, color: "from-navy to-accent" },
+    { name: "Node.js", icon: "Server", level: 80, color: "from-burgundy to-rose-deep" },
+    { name: "Tailwind CSS", icon: "Palette", level: 92, color: "from-primary to-gold-warm" },
+    { name: "Bases de Datos", icon: "Database", level: 75, color: "from-navy to-burgundy" },
+    { name: "Responsive", icon: "Smartphone", level: 95, color: "from-primary to-navy" },
+    { name: "UI/UX", icon: "Layout", level: 82, color: "from-gold-warm to-primary" },
+    { name: "APIs REST", icon: "Globe", level: 88, color: "from-navy to-primary" },
+  ];
+
   return (
     <section id="habilidades" className="py-24 sm:py-32 relative overflow-hidden">
       {/* Subtle grid */}
@@ -82,10 +90,10 @@ const SkillsSection = () => {
           </p>
         </ScrollReveal>
 
-        {/* Tech Metrics Bar */}
+        {/* Tech Metrics Bar (Static for now or map similar to skills if needed) */}
         <ScrollReveal>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-16">
-            {techMetrics.map((metric, i) => {
+            {techMetricsDefault.map((metric, i) => {
               const Icon = metric.icon;
               return (
                 <motion.div
@@ -108,8 +116,8 @@ const SkillsSection = () => {
         </ScrollReveal>
 
         {/* Skills with progress */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-20">
-          {skills.map((skill, i) => (
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-20 ${skillsLoading ? 'opacity-50' : ''}`}>
+          {skills.map((skill: any, i: number) => (
             <SkillBar key={i} {...skill} index={i} />
           ))}
         </div>
@@ -119,7 +127,7 @@ const SkillsSection = () => {
           <h3 className="font-serif text-2xl font-bold text-center mb-10 text-navy">Servicios</h3>
         </ScrollReveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {services.map((service, i) => {
+          {servicesDefault.map((service, i) => {
             const Icon = service.icon;
             return (
               <ScrollReveal key={i} delay={i * 0.1}>

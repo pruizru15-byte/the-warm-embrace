@@ -1,69 +1,69 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, BookOpen } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import ScrollReveal from "./ScrollReveal";
-
-const poems = [
-  {
-    title: "Código y Alma",
-    lines: [
-      "Entre llaves y puntos,",
-      "se esconde un suspiro,",
-      "cada línea que escribo",
-      "es un verso que respiro.",
-      "",
-      "La pantalla ilumina",
-      "lo que el alma dibuja,",
-      "compilando emociones",
-      "que ningún bug empuja.",
-    ],
-    reactions: { love: 12, spark: 8, book: 3 },
-  },
-  {
-    title: "Letras de Medianoche",
-    lines: [
-      "Cuando el mundo duerme,",
-      "mis dedos despiertan,",
-      "tecleando verdades",
-      "que los labios no aciertan.",
-      "",
-      "El cursor parpadea",
-      "como estrella perdida,",
-      "esperando una línea",
-      "que le cambie la vida.",
-    ],
-    reactions: { love: 24, spark: 15, book: 7 },
-  },
-  {
-    title: "Conexión Antigua",
-    lines: [
-      "No necesito WiFi",
-      "para sentir tu señal,",
-      "basta con tu mirada",
-      "para un ping emocional.",
-      "",
-      "En este mundo binario",
-      "de ceros y de unos,",
-      "prefiero tus abrazos",
-      "a un millón de puntos.",
-    ],
-    reactions: { love: 31, spark: 19, book: 11 },
-  },
-];
+import { usePoems } from "@/hooks/useData";
+import PoemCard from "./PoemCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const PoemsSection = () => {
-  const [reactionCounts, setReactionCounts] = useState(
-    poems.map((p) => ({ ...p.reactions }))
+  const { data: poemsData, isLoading } = usePoems();
+  const [reactionCounts, setReactionCounts] = useState<any[]>([]);
+  const plugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
   );
+
+  useEffect(() => {
+    if (poemsData) {
+      setReactionCounts(
+        poemsData.map((p: any) => ({
+          love: p.reactions_love || 0,
+          spark: p.reactions_spark || 0,
+          book: p.reactions_book || 0,
+        }))
+      );
+    }
+  }, [poemsData]);
 
   const handleReaction = (poemIdx: number, type: "love" | "spark" | "book") => {
     setReactionCounts((prev) =>
       prev.map((r, i) => (i === poemIdx ? { ...r, [type]: r[type] + 1 } : r))
     );
+    // TODO: Implement Supabase mutation to persist reactions if needed
   };
 
+  const defaultPoems = [
+    {
+      title: "Código y Alma",
+      lines: ["Entre llaves y puntos,", "se esconde un suspiro,", "cada línea que escribo", "es un verso que respiro."],
+      reactions: { love: 12, spark: 8, book: 3 },
+    },
+    {
+      title: "Silencio Digital",
+      lines: ["En el vacío del bit,", "busco el latido,", "donde el cero y el uno", "cobran sentido."],
+      reactions: { love: 5, spark: 10, book: 2 },
+    },
+    {
+      title: "La Danza del Compilador",
+      lines: ["Errores que bailan,", "bugs que se van,", "líneas que riman,", "sueños que están."],
+      reactions: { love: 8, spark: 12, book: 4 },
+    },
+    {
+      title: "Memoria del Mañana",
+      lines: ["Almaceno suspiros,", "cacheo emociones,", "limpio mis dudas,", "creo ilusiones."],
+      reactions: { love: 20, spark: 5, book: 15 },
+    },
+  ];
+
+  const displayPoems = poemsData || (isLoading ? [] : defaultPoems);
+
   return (
-    <section id="poemas" className="py-24 sm:py-32 bg-cream-warm/30">
+    <section id="poemas" className="py-24 sm:py-32 bg-cream-warm/30 overflow-hidden">
       <div className="section-container">
         <ScrollReveal>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-center mb-4 text-gradient">
@@ -74,52 +74,38 @@ const PoemsSection = () => {
           </p>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {poems.map((poem, i) => (
-            <ScrollReveal key={i} delay={i * 0.12}>
-              <div className="parchment rounded-2xl p-8 h-full flex flex-col">
-                <h3 className="font-serif text-2xl font-bold text-burgundy mb-6 text-center italic">
-                  {poem.title}
-                </h3>
-                <div className="flex-1 space-y-1 mb-6">
-                  {poem.lines.map((line, j) => (
-                    <p key={j} className="font-serif text-foreground/80 text-center text-sm leading-relaxed italic">
-                      {line || <br />}
-                    </p>
-                  ))}
-                </div>
-                <div className="flex items-center justify-center gap-4 pt-4 border-t border-burgundy/10">
-                  {[
-                    { type: "love" as const, icon: Heart, label: "Me encanta" },
-                    { type: "spark" as const, icon: Sparkles, label: "Inspirador" },
-                    { type: "book" as const, icon: BookOpen, label: "Profundo" },
-                  ].map((reaction) => {
-                    const Icon = reaction.icon;
-                    return (
-                      <button
-                        key={reaction.type}
-                        onClick={() => handleReaction(i, reaction.type)}
-                        className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors group"
-                        title={reaction.label}
-                      >
-                        <Icon size={18} className="group-hover:scale-110 transition-transform" />
-                        <AnimatePresence mode="popLayout">
-                          <motion.span
-                            key={reactionCounts[i][reaction.type]}
-                            initial={{ y: -10, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            className="text-xs font-sans font-medium"
-                          >
-                            {reactionCounts[i][reaction.type]}
-                          </motion.span>
-                        </AnimatePresence>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
+        <div className="relative group/carousel">
+          <Carousel
+            plugins={[plugin.current]}
+            className="w-full"
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
+            opts={{
+              align: "start",
+              loop: true,
+              slidesToScroll: 1,
+              breakpoints: {
+                "(min-width: 1024px)": { slidesToScroll: 3 }, // 3 fits better for poems with text
+              },
+            }}
+          >
+            <CarouselContent className="-ml-6">
+              {displayPoems.map((poem: any, i: number) => (
+                <CarouselItem key={poem.id || i} className="pl-6 basis-full md:basis-1/2 lg:basis-1/3">
+                  <PoemCard 
+                    poem={poem}
+                    index={i}
+                    reactionCounts={reactionCounts[i] || { love: 0, spark: 0, book: 0 }}
+                    onReaction={(type) => handleReaction(i, type)}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {/* Arrows revealed on hover */}
+            <CarouselPrevious className="hidden lg:flex -left-12 opacity-0 group-hover/carousel:opacity-100 transition-opacity border-none bg-transparent hover:bg-transparent text-primary hover:scale-125" />
+            <CarouselNext className="hidden lg:flex -right-12 opacity-0 group-hover/carousel:opacity-100 transition-opacity border-none bg-transparent hover:bg-transparent text-primary hover:scale-125" />
+          </Carousel>
         </div>
       </div>
     </section>
